@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AmpliQueso Report</title>
+</head>
+<body>
+<!--begin.rcode
+    opts_chunk$set(results='asis', echo=gvVerbose)
+    end.rcode-->
+
+
+
+<!--begin.rcode
+<<reportParTable>>=
+kable(reportParams, longtable=FALSE, booktabs=TRUE)
+
+
+end.rcode-->
+
+
+
+
+
+
+<!--begin.rcode
+<<countTable>>
+#xtable(t, caption ="Counts table", label ="CT",tabular.environment='longtable',floating=FALSE)
+library(knitr)
+kable(countRepTable, longtable=TRUE, booktabs=TRUE)
+
+
+
+end.rcode-->
+
+
+
+
+
+<!--begin.rcode volcanoPlot, fig.width=10, fig.height=10, out.width='.55\\linewidth'>>=
+#comment, no comment
+plot(foldChange, -log(countTableTran[,"p.value"])
+
+
+end.rcode-->
+
+
+
+
+
+<!--begin.rcode
+<<distrPlot, fig.width=10, fig.height=10, out.width='.55\\linewidth'>>=
+#comment, no comment
+legendPaths<-strsplit( colnames(countTable),"/")
+    legendSampl<-rep("",ncol(countTable))
+    y<-rep(0,binsNum)
+for(s in 1:ncol(countTable)){   
+        #remove outliers by taking 1st and 99th percentile of counts
+        countPercentiles<-quantile(countTable[,s],probs=c(0.01,0.99,0.9))
+        #50+1 for seq function due to its formula: by = ((to - from)/(length.out - 1)
+        bins <-seq(countPercentiles[1],countPercentiles[2],length.out=binsNum+1)
+        for(b in 2:length(bins)){         
+            y[b]<-length(countTable[,s][countTable[,s]>=bins[b-1] & countTable[,s]<bins[b]])   
+        }
+        if(s == 1){
+          plot(bins,y,type="l", col=(rainbow(s)[s]),ylim<-c(0,countPercentiles[2]),ylab="counts")
+        }
+        else{
+          lines(bins,y, col=(rainbow(s)[s])   )     
+        }
+        points(bins,y,col=(rainbow(s)[s]), cex=0.5, pch=1)
+        #get filenames from fullpaths
+        legendSampl[s]<-unlist(legendPaths[s])[length(unlist(legendPaths[s]))]
+    }
+    yPercentile<-quantile(y,probs=c(0.99))
+      legend(legend=legendSampl,x=countPercentiles[3],y=yPercentile[1],lty=c(1,1),col=rainbow(ncol(countTable)) )
+
+
+
+end.rcode-->
+
+
+
+
+<!--begin.rcode
+<<camelsTable>>=
+#xtable(t, caption ="Counts table", label ="CT",tabular.environment='longtable',floating=FALSE)
+kable(camelsRankTableSort, longtable=TRUE, booktabs=TRUE)
+
+
+end.rcode-->
+
+
+<!--begin.rcode
+<<SNPsTable1>>=
+if(nrow(snpDiffSickCountFilter) > 0){
+  
+  kable(snpDiffSickCountFilter, longtable=TRUE, booktabs=TRUE,row.names=FALSE)
+}
+#else{
+#  print("SNPs set difference iT1 minus iT2 is empty.")
+#}
+
+
+end.rcode-->
+
+<!--begin.rcode
+<<SNPsTable2>>=
+if(nrow(snpDiffHealthyCountFilter) > 0){
+  kable(snpDiffHealthyCountFilter, longtable=TRUE, booktabs=TRUE,row.names=FALSE)
+}
+#else{
+#  print("SNPs set difference iT2 minus iT1 is empty.")
+#}
+
+
+end.rcode-->
+
+
+
+</body>
+</html>

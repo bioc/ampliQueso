@@ -1,0 +1,271 @@
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+%\VignetteIndexEntry{ampliQueso primer}
+%\VignetteKeywords{}
+%\VignetteDepends{}
+%\VignettePackage{rnaSeqMap}
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage[numbers]{natbib}
+\usepackage{color}
+\usepackage[utf8]{inputenc} 
+
+
+
+\renewcommand*\familydefault{\sfdefault}
+
+\definecolor{NoteGrey}{rgb}{0.96,0.97,0.98}
+
+
+\textwidth=6.2in
+\textheight=9.5in
+@ \parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-1in
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\code}[1]{{\texttt{#1}}}
+
+\author{Alicja Szabelska, Marek Wiewiorka,  Michal Okoniewski}
+\begin{document}
+\title{\code{ampliQueso}: multiple sequencing of amplicons analyzed RNAseq style }
+
+\maketitle
+
+
+
+\tableofcontents
+\newpage
+
+\section{Recent changes and updates}
+
+\section{Introduction}
+
+\code{ampliQueso} is UNDER CONSTRUCTION :P
+
+but we do our best to make it functional and useful :)
+
+
+\code{ampliQueso} is intended to be a library that can analyze the data from small (and bigger) multiple- amplicon panels of RNA and DNA,
+in technologies such as AmpliSeq. 
+In comparison to eg TaqMan and similar RT-PCR technologies - AmpliSeq is a  technique that uses the sequencing library prepared
+with multiple primer pairs (eg up to 16000 in Comprehensive Cancer Panel) that get amplified in a normal PCR machine. 
+It can be compared to other sequencing enrichment techniques (), the difference is that is purely PCR-based. That's why it is expected
+to perform well eg with the slightly degraded (eg. paraffin embedded) samples. AmpliSeq protocols are in RNA and DNA versions, 
+the RNA one measures expression of the amplified region, and when coverage permits - allows to find SNPs and small indels too. 
+
+
+The number of amplicons in such kits may be too small to run
+\code{DESeq} or \code{edgeR} on count data in a way described eg in \cite{Anders2013}, and the amplicons may be designed eg in the critical regions of splicing, thus the basic analysis is based upon the coverage analysis described in \cite{Camels2011} and implemented in the package \code{rnaSeqMap} \cite{rnaSeqMap2011}.
+
+\code{ampliQueso} adds the functionality of non-parametric tests based upon the coverage analysis (camel) measures from \cite{Camels2011},
+and uses the external variant call software to add SNP and indel information.
+
+The analyses are bundled in a wrapper \code{runAQReport} that produces pdfs in Beamer or standard \LaTeX{} article format.
+
+The schema of processing in \code{ampliQueso} is as follows:
+\begin{figure}[h]
+  \includegraphics[scale=0.5]{fig1}
+  \caption{AmpliQueso high-level design, dashed arrows depict optional SNPs calling dataflow}
+\end{figure}
+
+% TU RYSUNEK
+
+\section{Using ampliQueso non-parametric tests on single genomic regions}
+
+Single genomic regions or batches of genomic regions may be compared with the camel/coverage measures using functions:
+
+% tu jakis przyklad - dwa rysunki pokryc podobnych i niepodobnych na jednym par(mfrow=c(2,2)) simplePlot(NDcov) x4
+% wyniki z porownywania cameli - podobnych i niepodobnych
+%\begin{figure}[h]
+%  \includegraphics[scale=0.5]{fig2}
+%  \caption{Comparison of two genomic regions with the camel/coverages measures.}
+%\end{figure}
+
+
+
+%\begin{center}
+%\begin{tabular}{llllll}
+%\toprule
+%region & DA & QQ & PP & HD1 & HD2\\
+%\midrule
+% RGS1:NM\_002922 & 0.004765442 & 1.117813 & 185.1135 & 3.702381 & 3.534091 \\
+%\midrule
+% PLEK:NM\_002664 & 0.1379676 & 65.47894 & 181890.7 & 84.68939 & 73.54605 \\
+%\bottomrule
+
+%\end{tabular}
+<<label=camelPlot3,echo=TRUE, fig=TRUE>>=
+library(ampliQueso)
+data(ampliQueso)
+par(mfrow=c(1,2))
+simplePlot(ndMin,exps=1:2,xlab="genome coordinates \n RGS1:NM_002922",
+           ylab="coverage")
+simplePlot(ndMax,exps=1:2,xlab="genome coordinates \n PLEK:NM_002664",
+           ylab="coverage")
+@
+
+
+Then, the measures from \code{rnaSeqMap} library can be used to generate p-values from non-paramertic tests 
+that express how the coverage shapes are different, eg:
+
+%=====================================================
+% Marek - tu wstaw chunk kodu pokazujacy pValuesy dla roznych miar - z funkcji camelTest
+%=====================================================
+
+
+<<samplecamelTest,echo=TRUE, results=tex>>=
+library(xtable)
+curWd<-getwd()
+setwd(path.package("ampliQueso")) ##only for sample report
+iCovdesc=system.file("extdata","covdesc",package="ampliQueso")
+iBedFile=system.file("extdata","AQ.bed",package="ampliQueso")
+iT1="s"
+iT2="h"
+camelTestTable <- camelTest(iBedFile=iBedFile,iCovdesc=iCovdesc, 
+                            iT1=iT1, iT2=iT2,iParallel=FALSE,iNPerm=5)
+#print sample p-values,not all of them
+camelTestTableDen<-camelTestTable[1:5,6:10]
+print(xtable(camelTestTableDen,caption="p-values from camel tests"))
+setwd(curWd)
+@
+The p-values may be used to find the most significantly differential shapes, thus - most significant differential expression in amplicons. 
+The values of camel measures can be used too, but normally they are less expressive. Still - can be compared between the regions:
+
+\begin{center}
+<<sampleCamtable,echo=TRUE, results=tex>>=
+library(xtable)
+data(ampliQueso)
+print(xtable(camelSampleTable,
+             caption="Camel/coverage measures for two sample regions"))
+
+@
+
+\end{center}
+ The object loaded from the example data contains the coverages as \code{NucleotideDistr} objects, defined in \code{rnaSeqMap} library. 
+
+
+\section{Classic read counting in amplicon regions}
+
+The simple analysis may include generating counts from BAM files, according to the amplicon description in the BED design file of the kit:
+<<camel2, eval=TRUE>>=
+library(ampliQueso)
+setwd(path.package("ampliQueso"))
+cc <- getCountTable(covdesc=system.file("extdata","covdesc",package="ampliQueso"),
+                    bedFile=system.file("extdata","AQ.bed",package="ampliQueso"))
+cc[1:4,1:2]
+@
+%<<test2, fig=TRUE,pdf=TRUE,>>=
+%print(plot(1:10, col="red", pch=19) )
+%@
+
+\section{Using an external variant caller - samtools mpileup}
+
+In DNA amplicon kits and when the coverage in RNA ones is sufficient, the genomic variants can be found. 
+The funcrtion \code{getSNP} encapsulates a system call to \code{samtools mpileup} with a reference genome:
+
+<<sampleSNPCaller,echo=TRUE, results=tex,eval=FALSE>>=
+#in order to run this example you need provide reference sequence 
+#in FASTA format and set refSeqFile parameter
+curWd<-getwd()
+setwd(path.package("ampliQueso")) ##only for sample report
+iCovdesc=system.file("extdata","covdesc",package="ampliQueso")
+iBedFile=system.file("extdata","AQ.bed",package="ampliQueso")
+snpList <- getSNP(covdesc=iCovdesc, minQual=10, 
+                  refSeqFile="hg19.fa", bedFile = iBedFile)
+setwd(curWd)
+@
+
+
+\section{The complete report on AmpliSeq experiment}
+
+The complete report of a two-group comparison on a given set of BAM files and given BED design desctiption includes 
+all the parts of analysis described in the sections above and can be called as follows:
+
+% tu chunk wywolania (ten co powyzej np)
+
+<<runQAReport, eval=FALSE>>=
+#########Example##########################
+library(ampliQueso)
+curWd<-getwd()
+setwd(path.package("ampliQueso")) ##only for sample report
+iCovdesc=system.file("extdata","covdesc",package="ampliQueso")
+iBedFile=system.file("extdata","AQ.bed",package="ampliQueso")
+iRefSeqFile=NULL
+iGroup="group"
+iT1="s"
+iT2="h"
+iTopN=5
+iMinQual=NULL
+iReportFormat="pdf"
+iReportType="article"
+iReportPath=curWd
+iVerbose=FALSE
+iParallel=FALSE
+
+runAQReport(iCovdesc=iCovdesc,iBedFile=iBedFile,iRefSeqFile=iRefSeqFile,
+iGroup=iGroup,iT1=iT1,iT2=iT2,iTopN=iTopN,iMinQual=iMinQual,
+iReportFormat=iReportFormat,iReportType=iReportType,
+            iReportPath,iVerbose=iVerbose,iParallel=iParallel)
+setwd(curWd)
+@
+it produces the pdf output.
+
+The report can be used also for the DNA kits, but then the fold change should be interpreted as a possible copy number difference.
+We are planning to differentiate the reports for RNA and DNA.
+
+\section{File formats}
+\subsection{BED format}
+AmpliQueso supports BED files in the following format (see also \ref{bedFile}):
+\begin{enumerate}
+  \item chromName
+  \item chromStart
+  \item chromEnd
+  \item strand
+  \item \emph{unspecified}
+  \item name
+\end{enumerate}
+\begin{figure}[h]
+\begin{verbatim}
+chr1     2488068         2488201         .       TNFRSF14        AMPL242431688
+chr1     2489144         2489273         .       TNFRSF14        AMPL262048751
+chr1     2489772         2489907         .       TNFRSF14        AMPL241330530
+chr1     2491241         2491331         .       TNFRSF14        AMPL242158034
+chr1     2491314         2491444         .       TNFRSF14        AMPL242161604
+\end{verbatim}
+\caption{Example BED file in the format supported by AmpliQueso}\label{bedFile}
+\end{figure}
+
+If a BED intened for use in AmpliQueso has a wrong column order one can easily rearrange them using for example \verb+awk+ tool:
+\begin{verbatim}
+awk '{print($1,"\t",$2,"\t",$3,"\t",$5,"\t",$6,"\t",$4)}' input.bed > output.bed
+\end{verbatim}
+In the example above columns 4,5,6 positions are swapped.
+
+\section{Troubleshooting}
+\subsection{Mac OS X}
+\subsubsection{\Rpackage{rgl} package}
+Please make sure that \verb+DISPLAY+ environemt variable is not set prior to runnin R in terminal. Otherwise loading \Rpackage{rgl} package may hang without any
+obvious reason.
+\subsubsection{\Rpackage{foreach} package}
+It is not safe to use \Rpackage{foreach} package from R.app on Mac OS X. This is why, it is recommended to use \Rpackage{ampliQueso} from
+a terminal session, starting R from the command line.
+\subsection{Windows}
+\subsubsection{\Rpackage{foreach} package}
+Depending on Windows firewall settings, it might be necessary to confirm firewall exceptions allowing launching R slave servers which necessary for using \Rpackage{foreach} package.
+\section{References}
+
+\begin{thebibliography}{9}
+\bibitem{Anders2013} Anders S,  McCarthy DJ, Chen Y, Okoniewski M, Smyth GK, Huber W,  Robinson MD, Count-based differential expression analysis of RNA sequencing data using R and Bioconductor, pre-print: http://arxiv.org/abs/1302.3685, Nature Protocols, 2013 – accepted for publication
+\bibitem{Camels2011} Okoniewski, M. J., Lesniewska, A., Szabelska, A., Zyprych-Walczak, J., Ryan, M., Wachtel, M., et al. (2011). Preferred analysis methods for single genomic regions in RNA sequencing revealed by processing the shape of coverage. Nucleic acids research. doi:10.1093/nar/gkr1249
+\bibitem{rnaSeqMap2011} Lesniewska, A., \& Okoniewski, M. J. (2011). rnaSeqMap: a Bioconductor package for RNA sequencing data exploration. BMC bioinformatics, 12, 200. doi:10.1186/1471-2105-12-200
+
+\end{thebibliography}
+
+
+\end{document}

@@ -1,0 +1,136 @@
+\documentclass[12pt,oneside]{article}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+\usepackage[utf8x]{inputenc}
+\usepackage{textpos}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=false}
+
+
+\begin{document}
+<<setup, include=FALSE>>=
+# smaller font size for chunks
+#opts_chunk$set(size = 'footnotesize')
+opts_chunk$set(results='asis', echo=gvVerbose)
+
+@
+
+\title {AmpliQueso Report}
+%\author{Michał Okoniewski, Alicja Szabelska, Marek Wiewiórka}
+%\author { Michal Okoniewski, Alicja Szabelka, Marek Wiewiorka}
+\maketitle
+\tableofcontents
+
+\section{Report parameters}
+\begin{center}
+<<reportParTable>>=
+kable(reportParams, longtable=FALSE, booktabs=TRUE)
+@
+\end{center}
+
+\section {RNA--seq count analysis}
+\subsection{Differentially expressed genes}
+
+\begin{center}
+<<countTable>>=
+#xtable(t, caption ="Counts table", label ="CT",tabular.environment='longtable',floating=FALSE)
+library(knitr)
+kable(countRepTable, longtable=TRUE, booktabs=TRUE)
+@
+\end{center}
+
+\subsection {Volcano plot}
+
+\begin{center}
+<<volcanoPlot, fig.width=10, fig.height=10, out.width='.55\\linewidth'>>=
+#comment, no comment
+plot(foldChange, -log(countTableTran[,"p.value"]))
+@
+\end{center}
+\subsection {Heatmap plot}
+\begin{center}
+<<heatmapPlot, fig.width=10, fig.height=10, out.width='.50\\linewidth'>>=
+#comment, no comment
+tabLen <-nrow(countTableTranSort)
+if(gvTopN > tabLen )
+  gvTopN = tabLen 
+heatmap.2(countTable[rownames(countTableTranSort[1:gvTopN,]),],trace="none")
+
+@
+\end{center}
+
+\subsection {Distributions of counts}
+
+
+\begin{center}
+<<distrPlot, fig.width=10, fig.height=10, out.width='.55\\linewidth'>>=
+#comment, no comment
+legendPaths<-strsplit( colnames(countTable),"/")
+    legendSampl<-rep("",ncol(countTable))
+    y<-rep(0,binsNum)
+for(s in 1:ncol(countTable)){   
+        #remove outliers by taking 1st and 99th percentile of counts
+        countTable[,s] <- log2(countTable[,s]+0.01)
+        countPercentiles<-quantile(countTable[,s],probs=c(0.01,0.99,0.8))
+        #50+1 for seq function due to its formula: by = ((to - from)/(length.out - 1)
+        bins <-seq(countPercentiles[1],countPercentiles[2],length.out=binsNum+1)
+        for(b in 2:length(bins)){         
+            y[b]<-length(countTable[,s][countTable[,s]>=bins[b-1] & countTable[,s]<bins[b]])   
+        }
+        if(s == 1){
+          plot(bins,y,type="l", col=(rainbow(s)[s]),ylim<-c(0,countPercentiles[2]),ylab="counts")
+        }
+        else{
+          lines(bins,y, col=(rainbow(s)[s])   )     
+        }
+        points(bins,y,col=(rainbow(s)[s]), cex=0.5, pch=1)
+        #get filenames from fullpaths
+        legendSampl[s]<-unlist(legendPaths[s])[length(unlist(legendPaths[s]))]
+    }
+    yPercentile<-quantile(y,probs=c(0.9999))
+      legend(legend=legendSampl,x=bins[length(bins)-3],y=yPercentile,lty=c(1,1),col=rainbow(ncol(countTable)) )
+
+@
+\end{center}
+
+\section{Camels' analysis}
+\subsection{Camels' measures}
+<<camelsTable>>=
+#xtable(t, caption ="Counts table", label ="CT",tabular.environment='longtable',floating=FALSE)
+kable(camelsRankTableSort, longtable=TRUE, booktabs=TRUE)
+@
+
+
+%\subsection{Camels' plots}
+%TBD
+<<camelsPlots>>=
+#xtable(t, caption ="Counts table", label ="CT",tabular.environment='longtable',floating=FALSE)
+@
+
+\section {SNPs calling}
+SNPs set difference (iT1 minus iT2)
+<<SNPsTable1>>=
+if(!is.null(gvRefSeqFile) && nrow(snpDiffSickCountFilter > 0) ){
+  
+  kable(snpDiffSickCountFilter, longtable=TRUE, booktabs=TRUE,row.names=FALSE)
+}
+#else{
+#  print("SNPs set difference iT1 minus iT2 is empty.")
+#}
+@
+SNPs set difference (iT2 minus iT1)
+<<SNPsTable2>>=
+if( !is.null(gvRefSeqFile) && nrow(snpDiffHealthyCountFilter) > 0){
+  kable(snpDiffHealthyCountFilter, longtable=TRUE, booktabs=TRUE,row.names=FALSE)
+}
+#else{
+#  print("SNPs set difference iT2 minus iT1 is empty.")
+#}
+@
+
+
+
+\end{document}

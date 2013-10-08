@@ -1,0 +1,8 @@
+importFrom(DESeq, newCountDataSet)
+importFrom(edgeR, calcNormFactors, DGEList)
+import("rnaSeqMap")
+exportPattern("^[^\\.]")
+
+
+
+
