@@ -261,7 +261,7 @@ Depending on Windows firewall settings, it might be necessary to confirm firewal
 \section{References}
 
 \begin{thebibliography}{9}
-\bibitem{Anders2013} Anders S,  McCarthy DJ, Chen Y, Okoniewski M, Smyth GK, Huber W,  Robinson MD, Count-based differential expression analysis of RNA sequencing data using R and Bioconductor, pre-print: http://arxiv.org/abs/1302.3685, Nature Protocols, 2013 – accepted for publication
+\bibitem{Anders2013} Anders S,  McCarthy DJ, Chen Y, Okoniewski M, Smyth GK, Huber W,  Robinson MD, Count-based differential expression analysis of RNA sequencing data using R and Bioconductor, pre-print: http://arxiv.org/abs/1302.3685, Nature Protocols, 2013 - accepted for publication
 \bibitem{Camels2011} Okoniewski, M. J., Lesniewska, A., Szabelska, A., Zyprych-Walczak, J., Ryan, M., Wachtel, M., et al. (2011). Preferred analysis methods for single genomic regions in RNA sequencing revealed by processing the shape of coverage. Nucleic acids research. doi:10.1093/nar/gkr1249
 \bibitem{rnaSeqMap2011} Lesniewska, A., \& Okoniewski, M. J. (2011). rnaSeqMap: a Bioconductor package for RNA sequencing data exploration. BMC bioinformatics, 12, 200. doi:10.1186/1471-2105-12-200
 
