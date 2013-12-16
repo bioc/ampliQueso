@@ -12,7 +12,6 @@ Imports: edgeR, DESeq, samr
 Suggests:
 Description: The package provides tools and reports for the analysis of amplicon sequencing panels, such as AmpliSeq 
 License: GPL-2
-URL:
 biocViews: Bioinformatics, ReportWriting, Transcription,
         GeneExpression, DifferentialExpression,
         HighThroughputSequencing, RNAseq, Visualization
