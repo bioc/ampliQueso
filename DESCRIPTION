@@ -1,19 +1,21 @@
 Package: ampliQueso
 Type: Package
 Title: Analysis of amplicon enrichment panels
-Version: 1.1.1
+Version: 1.1.2
 Date: 2013-08-06
-Author: Alicja Szabelska <alicja.szabelska@up.poznan.pl>; Marek Wiewiorka <marek.wiewiorka@gmail.com>; Michal Okoniewski <michal@fgcz.ethz.ch> 
+Author: Alicja Szabelska <alicja.szabelska@up.poznan.pl>; Marek
+        Wiewiorka <marek.wiewiorka@gmail.com>; Michal Okoniewski
+        <michal@fgcz.ethz.ch>
 Maintainer: Michal Okoniewski <michal@fgcz.ethz.ch>
 Depends: R (>= 2.15.0), rnaSeqMap (>= 2.17.1), knitr, rgl, ggplot2,
         gplots, parallel, doParallel, foreach,
         VariantAnnotation,genefilter,statmod,xtable
 Imports: edgeR, DESeq, samr
 Suggests:
-Description: The package provides tools and reports for the analysis of amplicon sequencing panels, such as AmpliSeq 
+Description: The package provides tools and reports for the analysis of
+        amplicon sequencing panels, such as AmpliSeq
 License: GPL-2
-biocViews: Bioinformatics, ReportWriting, Transcription,
-        GeneExpression, DifferentialExpression,
-        HighThroughputSequencing, RNAseq, Visualization
 Collate: compareCoverages.R getCountTable.R getSNP.R auxFunctions.R
         compareCoveragesRegions.R runAQReport.R getCamelTests.R
+biocViews: ReportWriting, Transcription, GeneExpression,
+        DifferentialExpression, Sequencing, RNASeq, Visualization
