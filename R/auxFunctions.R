@@ -11,7 +11,8 @@
     else	
 	{
 	   print("Package not found in CRAN, trying Biocondutor repository")
-	   source("http://bioconductor.org/biocLite.R")
+	   if (!requireNamespace("BiocManager", quietly=TRUE))
+    	   install.packages("BiocManager")
 	 #  .biocLite(packageName )
 	}
     if( do.call("require",list(packageName) ) ){
