@@ -1,7 +1,7 @@
 Package: ampliQueso
 Type: Package
 Title: Analysis of amplicon enrichment panels
-Version: 1.19.1
+Version: 1.19.2
 Date: 2013-08-06
 Author: Alicja Szabelska <alicja.szabelska@up.poznan.pl>; Marek
         Wiewiorka <marek.wiewiorka@gmail.com>; Michal Okoniewski

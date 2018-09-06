@@ -13,7 +13,7 @@
 	   print("Package not found in CRAN, trying Biocondutor repository")
 	   if (!requireNamespace("BiocManager", quietly=TRUE))
     	   install.packages("BiocManager")
-	 #  .biocLite(packageName )
+	 #  .BiocManager::install(packageName )
 	}
     if( do.call("require",list(packageName) ) ){
         print( paste(packageName,"installed and loaded",sep=" ") )
