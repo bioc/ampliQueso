@@ -1,7 +1,7 @@
 Package: ampliQueso
 Type: Package
 Title: Analysis of amplicon enrichment panels
-Version: 1.19.2
+Version: 1.19.3
 Date: 2013-08-06
 Author: Alicja Szabelska <alicja.szabelska@up.poznan.pl>; Marek
         Wiewiorka <marek.wiewiorka@gmail.com>; Michal Okoniewski
@@ -19,3 +19,4 @@ Collate: compareCoverages.R getCountTable.R getSNP.R auxFunctions.R
         compareCoveragesRegions.R runAQReport.R getCamelTests.R
 biocViews: ReportWriting, Transcription, GeneExpression,
         DifferentialExpression, Sequencing, RNASeq, Visualization
+PackageStatus: Deprecated
